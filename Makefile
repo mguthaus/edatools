@@ -1,7 +1,7 @@
 .ONESHELL:
 
 # Where to put the source repos
-REPO_DIR ?= $(PWD)/repos
+REPODIR ?= $(HOME)/repos
 # Where to install the binaries
 SWROOT ?= $(HOME)/software
 # Where to fetch the commercial software (from /software)
@@ -11,7 +11,7 @@ nproc=2
 APT_INSTALL=sudo apt install --install-recommends -y
 
 # Options for Trilinos/Xyce
-SRCDIR=$(REPO_DIR)/Trilinos
+SRCDIR=$(REPODIR)/Trilinos
 ARCHDIR=$(SWROOT)/XyceLibs/Parallel
 FLAGS="-O3 -fPIC"
 
@@ -33,8 +33,8 @@ general:
 # Network debug tools (can be removed to save space)
 	$(APT_INSTALL) iputils-ping net-tools lsof wget whois nmap telnet curl dnsutils tcpdump traceroute id-utils
 
-$(REPO_DIR):
-	mkdir -p $(REPO_DIR)
+$(REPODIR):
+	mkdir -p $(REPODIR)
 
 $(SWROOT):
 	mkdir -p $(SWROOT)
@@ -58,7 +58,7 @@ openram:
 	$(APT_INSTALL)  python3 python3-numpy python3-scipy python3-pip python3-matplotlib python3-venv
 
 .PHONY: openeda
-openeda: $(SWROOT) $(REPO_DIR)
+openeda: $(SWROOT) $(REPODIR)
 	$(APT_INSTALL) m4 csh  tk tk-dev tcl-dev blt-dev libreadline8 libreadline-dev 
 
 .PHONY: setup
@@ -92,15 +92,15 @@ synopsys: $(SWROOT)
 mentor: $(SWROOT)
 	rsync -azv $(HOST):/software/mentor $(SWROOT)
 
-$(REPO_DIR)/Trilinos:
-	git clone --depth 1 --branch trilinos-release-12-12-1 https://github.com/trilinos/Trilinos.git $(REPO_DIR)/Trilinos
+$(REPODIR)/Trilinos:
+	git clone --depth 1 --branch trilinos-release-12-12-1 https://github.com/trilinos/Trilinos.git $(REPODIR)/Trilinos
 
 .PHONY: trilinos
-trilinos: $(SWROOT) $(REPO_DIR)/Trilinos
+trilinos: $(SWROOT) $(REPODIR)/Trilinos
 	$(APT_INSTALL) libfftw3-dev mpich libblas-dev liblapack-dev libsuitesparse-dev libfl-dev libgtk-3-dev
-	cd $(REPO_DIR)/Trilinos
-	mkdir -p $(REPO_DIR)/Trilinos/build
-	cd $(REPO_DIR)/Trilinos/build
+	cd $(REPODIR)/Trilinos
+	mkdir -p $(REPODIR)/Trilinos/build
+	cd $(REPODIR)/Trilinos/build
 	cmake \
 	-G "Unix Makefiles" \
 	-DCMAKE_C_COMPILER=mpicc \
@@ -142,15 +142,15 @@ trilinos: $(SWROOT) $(REPO_DIR)/Trilinos
 	make -j $(nproc)
 	sudo make install
 
-$(REPO_DIR)/Xyce: $(REPO_DIR)/Xyce
-	git clone https://github.com/Xyce/Xyce.git $(REPO_DIR)/Xyce
+$(REPODIR)/Xyce: $(REPODIR)/Xyce
+	git clone https://github.com/Xyce/Xyce.git $(REPODIR)/Xyce
 
 .PHONY: xyce
-xyce: trilinos $(REPO_DIR)/Xyce
-	cd $(REPO_DIR)/Xyce
+xyce: trilinos $(REPODIR)/Xyce
+	cd $(REPODIR)/Xyce
 	./bootstrap
-	mkdir -p $(REPO_DIR)/Xyce/build
-	cd $(REPO_DIR)/Xyce/build
+	mkdir -p $(REPODIR)/Xyce/build
+	cd $(REPODIR)/Xyce/build
 	../configure CXXFLAGS="-O3 -std=c++11" \
 	ARCHDIR="$(ARCH_DIR)" \
 	CPPFLAGS="-I/usr/include/suitesparse" \
@@ -171,23 +171,23 @@ chrome:
 	wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 	sudo apt install ./google-chrome*.deb
 
-$(REPO_DIR)/magic-8.3:
-	git clone git://opencircuitdesign.com/magic-8.3 $(REPO_DIR)/magic-8.3
+$(REPODIR)/magic-8.3:
+	git clone git://opencircuitdesign.com/magic-8.3 $(REPODIR)/magic-8.3
 
 .PHONY: magic
-magic: openeda $(REPO_DIR)/magic-8.3
-	cd $(REPO_DIR)/magic-8.3
+magic: openeda $(REPODIR)/magic-8.3
+	cd $(REPODIR)/magic-8.3
 	./configure --prefix=$(SWROOT)
 	make
 	sudo make install
 
-$(REPO_DIR)/ngspice:
-	git clone git://git.code.sf.net/p/ngspice/ngspice $(REPO_DIR)/ngspice
+$(REPODIR)/ngspice:
+	git clone git://git.code.sf.net/p/ngspice/ngspice $(REPODIR)/ngspice
 
 .PHONY: ngspice
-ngspice: $(SWROOT) $(REPO_DIR)/ngspice
+ngspice: $(SWROOT) $(REPODIR)/ngspice
 	$(APT_INSTALL) libxaw7-dev octave
-	cd $(REPO_DIR)/ngspice
+	cd $(REPODIR)/ngspice
 	./autogen.sh
 	./configure \
 	--enable-openmp \
@@ -196,33 +196,33 @@ ngspice: $(SWROOT) $(REPO_DIR)/ngspice
 	make -j $(nproc)
 	sudo make install
 
-$(REPO_DIR)/netgen:
-	git clone git://opencircuitdesign.com/netgen-1.5 $(REPO_DIR)/netgen
+$(REPODIR)/netgen:
+	git clone git://opencircuitdesign.com/netgen-1.5 $(REPODIR)/netgen
 
 .PHONY: netgen
-netgen: openeda $(REPO_DIR)/netgen
-	cd $(REPO_DIR)/netgen
+netgen: openeda $(REPODIR)/netgen
+	cd $(REPODIR)/netgen
 	git checkout netgen-1.5
 	./configure --prefix=$(SWROOT)
 	make -j $(nproc)
 	sudo make install
 
-$(REPO_DIR)/klayout:
-	git clone https://github.com/KLayout/klayout $(REPO_DIR)/klayout
+$(REPODIR)/klayout:
+	git clone https://github.com/KLayout/klayout $(REPODIR)/klayout
 
 .PHONY: klayout
-klayout: $(SWROOT) $(REPO_DIR)/klayout
+klayout: $(SWROOT) $(REPODIR)/klayout
 	$(APT_INSTALL) qt5-default qtcreator ruby-full ruby-dev python3-dev qtmultimedia5-dev libqt5multimediawidgets5 libqt5multimedia5-plugins libqt5multimedia5 libqt5svg5-dev libqt5designer5 libqt5designercomponents5 libqt5xmlpatterns5-dev qttools5-dev
-	cd $(REPO_DIR)/klayout
+	cd $(REPODIR)/klayout
 	./build.sh -qt5 
 	cp -r bin-release $(SWROOT)/klayout
 
-$(REPO_DIR)/xschem-gaw:
-	git@github.com:StefanSchippers/xschem-gaw.git $(REPO_DIR)/xschem-gaw
+$(REPODIR)/xschem-gaw:
+	git@github.com:StefanSchippers/xschem-gaw.git $(REPODIR)/xschem-gaw
 
 .PHONY: xschem
-xschem: $(SWROOT) $(REPO_DIR)/xschem-gaw
-	cd $(REPO_DIR)/xschem-gaw
+xschem: $(SWROOT) $(REPODIR)/xschem-gaw
+	cd $(REPODIR)/xschem-gaw
 	./configure --prefix=$(SWROOT)
 	make -j $(nproc)
 	sudo make install
@@ -238,7 +238,7 @@ repos:
 
 .PHONY: vagrant
 vagrant:
-	cd $(REPO_DIR)
+	cd $(REPODIR)
 	$(APT_INSTALL) virtualbox
 	curl -O https://releases.hashicorp.com/vagrant/2.2.18/vagrant_2.2.18_x86_64.deb
 	$(APT) install ./vagrant_2.2.18_x86_64.deb
