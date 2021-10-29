@@ -92,7 +92,7 @@ export SW_PDK_ROOT=$HOME/data/skywater-src-nda
 export PDK_HOME=$SW_PDK_ROOT/s8/V2.0.1
 export SW_IP_HOME=$SW_PDK_ROOT/s8_ip
 export METAL_STACK="s8phirs_10r"
-export PDK_ROOT=$SWROOT/sky130A
+export PDK_ROOT=$SWROOT/share/pdk
 #export NDA_PDK_ROOT=$HOME/data/skywater-src-nda/s8/V2.0.1
 
 export PDK_MODEL_HOME=$PDK_HOME
