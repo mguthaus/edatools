@@ -6,7 +6,7 @@ REPODIR ?= $(HOME)/repos
 SWROOT ?= $(HOME)/software
 # Where to fetch the commercial software (from /software)
 HOST=mrg@donut.soe.ucsc.edu
-nproc=2
+nproc=4
 
 APT_INSTALL=sudo apt install --install-recommends -y
 
@@ -14,6 +14,9 @@ APT_INSTALL=sudo apt install --install-recommends -y
 SRCDIR=$(REPODIR)/Trilinos
 ARCHDIR=$(SWROOT)/XyceLibs/Parallel
 FLAGS="-O3 -fPIC"
+
+# Don't put commercial here because most won't need it.
+all: general open
 
 ### Dependencies ###
 .PHONY: general
