@@ -1,5 +1,5 @@
 
-export SWROOT=/software
+export SWROOT=${SWROOT:-'/software'}
 
 export LM_LICENSE_FILE=27000@license.soe.ucsc.edu
 
