@@ -15,8 +15,46 @@ SRCDIR=$(REPODIR)/Trilinos
 ARCHDIR=$(SWROOT)/XyceLibs/Parallel
 FLAGS="-O3 -fPIC"
 
+help:
+	@echo "all: general and open source tools"
+	@echo ""
+	@echo "general: general dependencies"
+	@echo ""
+	@echo "open: open source tools"
+	@echo "magic"
+	@echo "netgen"
+	@echo "klayout"
+	@echo "xschem"
+	@echo "ngspice"
+	@echo "xyce"
+	@echo "trilinos"
+	@echo ""
+	@echo "commercial: commercial tools via rsync (requires VLSIDA account)"
+	@echo "synopsys"
+	@echo "cadence"
+	@echo "mentor"
+	@echo ""
+	@echo "other:"
+	@echo "vagrant"
+	@echo "chrome"
+	@echo ""
+	@echo "tech:"
+	@echo "sky130: google/skywater PDK and open_pdks"
+
 # Don't put commercial here because most won't need it.
 all: general open
+
+.PHONY: open
+open: magic netgen klayout ngspice xyce
+
+.PHONY: commercial
+commercial: synopsys cadence mentor
+
+.PHONY: other
+other: vagrant chrome
+
+.PHONY: tech
+other: sky130
 
 ### Dependencies ###
 .PHONY: general
@@ -41,12 +79,6 @@ $(REPODIR):
 
 $(SWROOT):
 	mkdir -p $(SWROOT)
-
-.PHONY: open
-open: magic netgen klayout ngspice xyce
-
-.PHONY: commercial
-commercial: synopsys cadence mentor
 
 .PHONY: python
 python:
@@ -113,7 +145,7 @@ trilinos: $(SWROOT) $(REPODIR)/Trilinos
 	-DCMAKE_C_FLAGS=$(FLAGS) \
 	-DCMAKE_Fortran_FLAGS=$(FLAGS) \
 	-DCMAKE_INSTALL_PREFIX="$(ARCHDIR)" \
-	-DCMAKE_MAKE_PROGRAM="make" \
+n	-DCMAKE_MAKE_PROGRAM="make" \
 	-DTrilinos_ENABLE_NOX=ON \
 	-DNOX_ENABLE_LOCA=ON \
 	-DTrilinos_ENABLE_EpetraExt=ON \
@@ -229,6 +261,16 @@ xschem: $(SWROOT) $(REPODIR)/xschem-gaw
 	./configure --prefix=$(SWROOT)
 	make -j $(nproc)
 	sudo make install
+
+.PHONY: sky130
+sky130: $(REPODIR)/open_pdks
+	cd $(REPODIR)/open_pdks
+	./configure --prefix=$(SWROOT) --enable-sky130-pdk
+	make
+	sudo make install
+
+$(REPODIR)/open_pdks:
+	git clone git://opencircuitdesign.com/open_pdks $(REPODIR)/open_pdks
 
 .PHONY: vagrant
 vagrant:
