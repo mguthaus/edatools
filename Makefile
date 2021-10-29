@@ -49,7 +49,7 @@ commercial: synopsys cadence mentor
 python:
 # Code stuff for elpy
 	$(APT_INSTALL) python3 python3-setuptools python3-pip
-	python3 -m pip install jedi autopep8 rope flake8 yapf black 
+	python3 -m pip install jedi autopep8 rope flake8 yapf black
 # Openvpn
 #	$(APT_INSTALL) openconnect lib32ncurses5 lib32tinfo5 lib32z1 libc6-i386 libpkcs11-helper1 openvpn vpnc-scripts net-tools
 
@@ -59,7 +59,7 @@ openram:
 
 .PHONY: openeda
 openeda: $(SWROOT) $(REPODIR)
-	$(APT_INSTALL) m4 csh  tk tk-dev tcl-dev blt-dev libreadline8 libreadline-dev 
+	$(APT_INSTALL) m4 csh  tk tk-dev tcl-dev blt-dev libreadline8 libreadline-dev
 
 .PHONY: setup
 setup:
@@ -76,7 +76,7 @@ calibre: opengl $(SWROOT)
 .PHONY: synopsys
 synopsys: $(SWROOT)
 	  $(APT_INSTALL) libjpeg62 libtiff5 libmng2 libpng16-16
-	ln -s /usr/lib/x86_64-linux-gnu/libtiff.so.5 /usr/lib/x86_64-linux-gnu/libtiff.so.3 
+	ln -s /usr/lib/x86_64-linux-gnu/libtiff.so.5 /usr/lib/x86_64-linux-gnu/libtiff.so.3
 	ln -s /usr/lib/x86_64-linux-gnu/libmng.so.2 /usr/lib/x86_64-linux-gnu/libmng.so.1
 	$(APT_INSTALL) libqt5widgets5 libqt5x11extras5 libqt5printsupport5 libqt5xml5 libqt5sql5 libqt5svg5
 	$(APT_INSTALL) wget
@@ -214,7 +214,7 @@ $(REPODIR)/klayout:
 klayout: $(SWROOT) $(REPODIR)/klayout
 	$(APT_INSTALL) qt5-default qtcreator ruby-full ruby-dev python3-dev qtmultimedia5-dev libqt5multimediawidgets5 libqt5multimedia5-plugins libqt5multimedia5 libqt5svg5-dev libqt5designer5 libqt5designercomponents5 libqt5xmlpatterns5-dev qttools5-dev
 	cd $(REPODIR)/klayout
-	./build.sh -qt5 
+	./build.sh -qt5
 	cp -r bin-release $(SWROOT)/klayout
 
 $(REPODIR)/xschem-gaw:
@@ -227,19 +227,9 @@ xschem: $(SWROOT) $(REPODIR)/xschem-gaw
 	make -j $(nproc)
 	sudo make install
 
-
-.PHONY: repos
-repos:
-#hostnamectl set-hostname $1
-	git clone git@github.com:VLSIDA/PrivateRAM.git openram
-	git clone git@github.com:VLSIDA/OpenRAM.git openram-pub
-	git clone git@github.com:VLSIDA/openram_testchip.git 
-	git clone --recurse-submodules git@github.com:mguthaus/personal.git
-
 .PHONY: vagrant
 vagrant:
 	cd $(REPODIR)
 	$(APT_INSTALL) virtualbox
 	curl -O https://releases.hashicorp.com/vagrant/2.2.18/vagrant_2.2.18_x86_64.deb
 	$(APT) install ./vagrant_2.2.18_x86_64.deb
-
