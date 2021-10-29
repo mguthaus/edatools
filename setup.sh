@@ -68,12 +68,12 @@ export PATH=$PATH:$KLAYOUT_PATH
 export PATH=$PATH:/usr/local/bin
 
 # Xyce
-# Xyce                                                                                                                                                                                                                                 
-export XYCE_HOME=$SWROOT/Xyce/Parallel                                                                                                                                                                                                 
-export XYCE_PATH=$XYCE_HOME/bin                                                                                                                                                                                                        
-export PATH=$PATH:$XYCE_PATH                                                                                                                                                                                                           
-export XYCE_LIB=$XYCE_HOME/lib                                                                                                                                                                                                         
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$XYCE_LIB 
+# Xyce
+export XYCE_HOME=$SWROOT/Xyce/Parallel
+export XYCE_PATH=$XYCE_HOME/bin
+export PATH=$PATH:$XYCE_PATH
+export XYCE_LIB=$XYCE_HOME/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$XYCE_LIB
 export XYCE_NO_TRACKING="anything at all"
 
 # PDKs
@@ -92,7 +92,7 @@ export SW_PDK_ROOT=$HOME/data/skywater-src-nda
 export PDK_HOME=$SW_PDK_ROOT/s8/V2.0.1
 export SW_IP_HOME=$SW_PDK_ROOT/s8_ip
 export METAL_STACK="s8phirs_10r"
-export PDK_ROOT=$SWROOT/PDKs
+export PDK_ROOT=$SWROOT/sky130A
 #export NDA_PDK_ROOT=$HOME/data/skywater-src-nda/s8/V2.0.1
 
 export PDK_MODEL_HOME=$PDK_HOME
