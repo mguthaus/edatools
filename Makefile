@@ -4,23 +4,22 @@
 REPODIR ?= $(HOME)/repos
 # Where to install the binaries
 SWROOT ?= $(HOME)/software
+# Set this if the SWROOT is not user writable
+SUDO=sudo
+
 # Where to fetch the commercial software (from /software)
-HOST=mrg@donut.soe.ucsc.edu
+HOST=`whoami`@donut.soe.ucsc.edu
 nproc=4
 
-APT_INSTALL=sudo apt install --install-recommends -y
+APT_INSTALL=$(SUDO) apt install --install-recommends -y
 
-# Options for Trilinos/Xyce
-SRCDIR=$(REPODIR)/Trilinos
-ARCHDIR=$(SWROOT)/XyceLibs/Parallel
-FLAGS="-O3 -fPIC"
-
+.PHONY: help
 help:
-	@echo "all: general and open source tools"
+	@echo "sudo: add this target to run installs with sudo"
 	@echo ""
 	@echo "general: general dependencies"
 	@echo ""
-	@echo "open: open source tools"
+	@echo "open: all open source tools"
 	@echo "magic"
 	@echo "netgen"
 	@echo "klayout"
@@ -41,11 +40,17 @@ help:
 	@echo "tech:"
 	@echo "sky130: google/skywater PDK and open_pdks"
 
-# Don't put commercial here because most won't need it.
-all: general open
+all: help
+
+### Dependencies ###
+$(REPODIR):
+	mkdir -p $(REPODIR)
+
+$(SWROOT):
+	mkdir -p $(SWROOT)
 
 .PHONY: open
-open: magic netgen klayout ngspice xyce
+open: general magic netgen klayout ngspice xyce
 
 .PHONY: commercial
 commercial: synopsys cadence mentor
@@ -54,43 +59,51 @@ commercial: synopsys cadence mentor
 other: vagrant chrome
 
 .PHONY: tech
-other: sky130
+tech: sky130
 
-### Dependencies ###
+# General Linux stuff
 .PHONY: general
-general:
-	sudo apt update
-	sudo apt upgrade -y
-	$(APT_INSTALL) build-essential git ssh vim cmake autoconf automake libtool bison flex libncurses5-dev gdb
-	$(APT_INSTALL) libx11-dev libcairo2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev
+general: update build interactive python lsb x11 network
 
-	sudo rm /bin/sh && sudo ln -s /bin/bash /bin/sh
+.PHONY: update
+update:
+	$(SUDO) apt update
+	$(SUDO) apt upgrade -y
+
+# Build tools
+.PHONY: build
+build:
+	$(APT_INSTALL) build-essential git ssh cmake autoconf automake libtool bison flex libncurses5-dev gdb
+	$(SUDO) rm /bin/sh && $(SUDO) ln -s /bin/bash /bin/sh
+
 # X11
-	$(APT_INSTALL) x11-xserver-utils
+.PHONY: x11
+x11:
+	$(APT_INSTALL) libx11-dev libcairo2-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev x11-xserver-utils
+
 # Needed to run lmstat
+.PHONY: lsb
+lsb:
 	$(APT_INSTALL) lsb lsb-release lsb-core
+
 # Interactive tools
-	$(APT_INSTALL) emacs tmux
+.PHONY: interactive
+	$(APT_INSTALL) emacs tmux vim
+
 # Network debug tools (can be removed to save space)
+.PHONY: network
+network:
 	$(APT_INSTALL) iputils-ping net-tools lsof wget whois nmap telnet curl dnsutils tcpdump traceroute id-utils
-
-$(REPODIR):
-	mkdir -p $(REPODIR)
-
-$(SWROOT):
-	mkdir -p $(SWROOT)
 
 .PHONY: python
 python:
-# Code stuff for elpy
+# Python3
 	$(APT_INSTALL) python3 python3-setuptools python3-pip
 	python3 -m pip install jedi autopep8 rope flake8 yapf black
-# Openvpn
-#	$(APT_INSTALL) openconnect lib32ncurses5 lib32tinfo5 lib32z1 libc6-i386 libpkcs11-helper1 openvpn vpnc-scripts net-tools
 
 .PHONY: openram
-openram:
-	$(APT_INSTALL)  python3 python3-numpy python3-scipy python3-pip python3-matplotlib python3-venv
+openram: python
+	$(APT_INSTALL)  python3 python3-numpy python3-scipy python3-pip python3-matplotlib python3-venv python3-sklearn python-subunit python3-coverage
 
 .PHONY: openeda
 openeda: $(SWROOT) $(REPODIR)
@@ -132,6 +145,13 @@ $(REPODIR)/Trilinos:
 
 .PHONY: trilinos
 trilinos: $(SWROOT) $(REPODIR)/Trilinos
+
+# Options for Trilinos/Xyce
+	$(eval SRCDIR=$(REPODIR)/Trilinos)
+	$(eval ARCHDIR=$(SWROOT)/XyceLibs/Parallel)
+	$(eval FLAGS="-O3 -fPIC")
+
+
 	$(APT_INSTALL) libfftw3-dev mpich libblas-dev liblapack-dev libsuitesparse-dev libfl-dev libgtk-3-dev
 	cd $(REPODIR)/Trilinos
 	mkdir -p $(REPODIR)/Trilinos/build
@@ -145,7 +165,7 @@ trilinos: $(SWROOT) $(REPODIR)/Trilinos
 	-DCMAKE_C_FLAGS=$(FLAGS) \
 	-DCMAKE_Fortran_FLAGS=$(FLAGS) \
 	-DCMAKE_INSTALL_PREFIX="$(ARCHDIR)" \
-n	-DCMAKE_MAKE_PROGRAM="make" \
+	-DCMAKE_MAKE_PROGRAM="make" \
 	-DTrilinos_ENABLE_NOX=ON \
 	-DNOX_ENABLE_LOCA=ON \
 	-DTrilinos_ENABLE_EpetraExt=ON \
@@ -175,7 +195,7 @@ n	-DCMAKE_MAKE_PROGRAM="make" \
 	-DTPL_ENABLE_MPI=ON \
 	$(SRCDIR)
 	make -j $(nproc)
-	sudo make install
+	$(SUDO) make install
 
 $(REPODIR)/Xyce: $(REPODIR)/Xyce
 	git clone https://github.com/Xyce/Xyce.git $(REPODIR)/Xyce
@@ -198,13 +218,13 @@ xyce: trilinos $(REPODIR)/Xyce
 # This crashes a VM!
 #	make -j $(nproc)
 	make
-	sudo make install
+	$(SUDO) make install
 
 .PHONY: chrome
 chrome:
 	$(APT_INSTALL) libxss1 libappindicator1 libindicator7
 	wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-	sudo apt install ./google-chrome*.deb
+	$(SUDO) apt install ./google-chrome*.deb
 
 $(REPODIR)/magic-8.3:
 	git clone git://opencircuitdesign.com/magic-8.3 $(REPODIR)/magic-8.3
@@ -214,7 +234,7 @@ magic: openeda $(REPODIR)/magic-8.3
 	cd $(REPODIR)/magic-8.3
 	./configure --prefix=$(SWROOT)
 	make
-	sudo make install
+	$(SUDO) make install
 
 $(REPODIR)/ngspice:
 	git clone git://git.code.sf.net/p/ngspice/ngspice $(REPODIR)/ngspice
@@ -229,7 +249,7 @@ ngspice: $(SWROOT) $(REPODIR)/ngspice
 	--with-readline \
 	--prefix=$(SWROOT)
 	make -j $(nproc)
-	sudo make install
+	$(SUDO) make install
 
 $(REPODIR)/netgen:
 	git clone git://opencircuitdesign.com/netgen-1.5 $(REPODIR)/netgen
@@ -240,7 +260,7 @@ netgen: openeda $(REPODIR)/netgen
 	git checkout netgen-1.5
 	./configure --prefix=$(SWROOT)
 	make -j $(nproc)
-	sudo make install
+	$(SUDO) make install
 
 $(REPODIR)/klayout:
 	git clone https://github.com/KLayout/klayout $(REPODIR)/klayout
@@ -260,14 +280,14 @@ xschem: $(SWROOT) $(REPODIR)/xschem-gaw
 	cd $(REPODIR)/xschem-gaw
 	./configure --prefix=$(SWROOT)
 	make -j $(nproc)
-	sudo make install
+	$(SUDO) make install
 
 .PHONY: sky130
 sky130: $(REPODIR)/open_pdks
 	cd $(REPODIR)/open_pdks
 	./configure --prefix=$(SWROOT) --enable-sky130-pdk
 	make
-	sudo make install
+	$(SUDO) make install
 
 $(REPODIR)/open_pdks:
 	git clone git://opencircuitdesign.com/open_pdks $(REPODIR)/open_pdks
@@ -278,3 +298,7 @@ vagrant:
 	$(APT_INSTALL) virtualbox
 	curl -O https://releases.hashicorp.com/vagrant/2.2.18/vagrant_2.2.18_x86_64.deb
 	$(APT) install ./vagrant_2.2.18_x86_64.deb
+
+.PHONY: clean
+clean:
+	rm -rf $(REPODIR)
