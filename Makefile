@@ -106,7 +106,7 @@ lsb:
 
 # Interactive tools
 .PHONY: interactive
-	$(APT_INSTALL) emacs tmux vim
+	$(APT_INSTALL) emacs tmux vim htop
 
 # Network debug tools (can be removed to save space)
 .PHONY: network
