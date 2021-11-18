@@ -20,13 +20,22 @@ help:
 	@echo "general: general dependencies"
 	@echo ""
 	@echo "open: all open source tools"
+	@echo "layout"
+	@echo "spice"
+	@echo "litho"
+	@echo ""
+	@echo "layout: layout tools"
 	@echo "magic"
 	@echo "netgen"
 	@echo "klayout"
-	@echo "xschem"
+	@echo ""
+	@echo "spice: spice tools"
 	@echo "ngspice"
+	@echo "xschem"
 	@echo "xyce"
 	@echo "trilinos"
+	@echo ""
+	@echo "litho: litho tools"
 	@echo ""
 	@echo "commercial: commercial tools via rsync (requires VLSIDA account)"
 	@echo "synopsys"
@@ -50,7 +59,16 @@ $(SWROOT):
 	mkdir -p $(SWROOT)
 
 .PHONY: open
-open: general magic netgen klayout ngspice xyce
+open: general layout spice litho
+
+.PHONY: layout
+layout: magic netgen klayout
+
+.PHONY: spice
+spice: ngspice xyce
+
+.PHONY: litho
+litho: DimmiLitho
 
 .PHONY: commercial
 commercial: synopsys cadence mentor
@@ -197,7 +215,7 @@ trilinos: $(SWROOT) $(REPODIR)/Trilinos
 	make -j $(nproc)
 	$(SUDO) make install
 
-$(REPODIR)/Xyce: $(REPODIR)/Xyce
+$(REPODIR)/Xyce:
 	git clone https://github.com/Xyce/Xyce.git $(REPODIR)/Xyce
 
 .PHONY: xyce
@@ -207,7 +225,7 @@ xyce: trilinos $(REPODIR)/Xyce
 	mkdir -p $(REPODIR)/Xyce/build
 	cd $(REPODIR)/Xyce/build
 	../configure CXXFLAGS="-O3 -std=c++11" \
-	ARCHDIR="$(ARCH_DIR)" \
+	ARCHDIR="$(SWROOT)/XyceLibs/Parallel" \
 	CPPFLAGS="-I/usr/include/suitesparse" \
 	--enable-mpi \
 	CXX=mpicxx \
@@ -219,6 +237,11 @@ xyce: trilinos $(REPODIR)/Xyce
 #	make -j $(nproc)
 	make
 	$(SUDO) make install
+
+$(REPODIR)/DimmiLitho: $(REPODIR)/DimmiLitho
+	git clone https://github.com/mguthaus/DimmiLitho.git
+
+dimmilitho: $(REPODIR)/DimmiLitho
 
 .PHONY: chrome
 chrome:
