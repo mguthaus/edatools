@@ -293,8 +293,8 @@ klayout: $(SWROOT) $(REPODIR)/klayout
 	$(APT_INSTALL) qt5-default qtcreator ruby-full ruby-dev python3-dev qtmultimedia5-dev libqt5multimediawidgets5 libqt5multimedia5-plugins libqt5multimedia5 libqt5svg5-dev libqt5designer5 libqt5designercomponents5 libqt5xmlpatterns5-dev qttools5-dev
 	cd $(REPODIR)/klayout
 	./build.sh -qt5 -python python3
-	rm -rf $(SWROOT)/klayout
-	cp -r bin-release $(SWROOT)/klayout
+	$(SUDO) rm -rf $(SWROOT)/klayout
+	$(SUDO) cp -r bin-release $(SWROOT)/klayout
 
 $(REPODIR)/xschem-gaw:
 	git@github.com:StefanSchippers/xschem-gaw.git $(REPODIR)/xschem-gaw
