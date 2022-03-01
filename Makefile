@@ -28,6 +28,7 @@ help:
 	@echo "magic"
 	@echo "netgen"
 	@echo "klayout"
+	@echo "irsim"
 	@echo ""
 	@echo "spice: spice tools"
 	@echo "ngspice"
@@ -259,6 +260,16 @@ magic: openeda $(REPODIR)/magic-8.3
 	make
 	$(SUDO) make install
 
+$(REPODIR)/irsim:
+	git clone git://opencircuitdesign.com/irsim $(REPODIR)/irsim
+
+.PHONY: irsim
+magic: openeda $(REPODIR)/irsim
+	cd $(REPODIR)/irsim
+	./configure --prefix=$(SWROOT)
+	make
+	$(SUDO) make install
+
 $(REPODIR)/ngspice:
 	git clone git://git.code.sf.net/p/ngspice/ngspice $(REPODIR)/ngspice
 
@@ -315,6 +326,17 @@ sky130: $(REPODIR)/open_pdks
 
 $(REPODIR)/open_pdks:
 	git clone git://opencircuitdesign.com/open_pdks $(REPODIR)/open_pdks
+
+$(REPODIR)/neovim:
+	git clone https://github.com/neovim/neovim.git $(REPODIR)/neovim
+
+.PHONY: $(REPODIR)/neovim
+netgen: openeda $(REPODIR)/netgen
+	$(SUDO) apt install libtool-bin
+	cd $(REPODIR)/neovim
+	git checkout stable
+	make CMAKE_BUILD_TYPE=Release
+	$(SUDO) make install
 
 .PHONY: vagrant
 vagrant:
